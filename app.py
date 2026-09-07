@@ -245,6 +245,10 @@ app = gr.mount_gradio_app(fastapi_app, demo, path="/")
 
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.environ.get("PORT", 7860))
+    # On Hugging Face Spaces, user apps MUST bind to 7860 (HF uses other ports like 7861 internally)
+    if os.environ.get("SPACE_ID") or os.environ.get("SPACE_REPO_NAME") or os.environ.get("SYSTEM") == "spaces":
+        port = 7860
+    else:
+        port = int(os.environ.get("PORT", 7860))
     print(f"🚀 Telco Churn Intelligence Platform starting on http://0.0.0.0:{port}")
     uvicorn.run(app, host="0.0.0.0", port=port)
