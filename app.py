@@ -55,14 +55,17 @@ try:
 except Exception:
     pass
 
-# 3. Compatibility hook for Hugging Face ZeroGPU environments (type: ignore prevents local IDE linter warning)
+# 3. Compatibility hook for Hugging Face ZeroGPU environments
 try:
     import spaces  # type: ignore
-    @spaces.GPU
-    def _zero_gpu_inference_hook():
-        return True
+    gpu_decorator = spaces.GPU
 except Exception:
-    pass
+    def gpu_decorator(func=None, **kwargs):
+        if func is not None:
+            return func
+        def wrapper(f):
+            return f
+        return wrapper
 
 import gradio as gr
 
@@ -74,6 +77,7 @@ spec.loader.exec_module(server_module)
 fastapi_app = server_module.app
 
 # 4. Gradio Prediction Helper
+@gpu_decorator
 def gradio_predict(
     gender, senior_citizen, partner, dependents, tenure,
     phone_service, multiple_lines, internet_service, online_security,
@@ -249,7 +253,8 @@ with gr.Blocks(title="Telco Churn Intelligence Platform", css=custom_css) as dem
                 """
             )
 
-# 6. Mount Gradio onto the FastAPI application
+# 6. Enable queue and mount Gradio onto the FastAPI application
+demo.queue()
 app = gr.mount_gradio_app(fastapi_app, demo, path="/")
 
 if __name__ == "__main__":
