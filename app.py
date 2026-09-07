@@ -44,6 +44,15 @@ try:
 except Exception:
     pass
 
+# 3. Compatibility hook for Hugging Face ZeroGPU environments
+try:
+    import spaces
+    @spaces.GPU
+    def _zero_gpu_inference_hook():
+        return True
+except Exception:
+    pass
+
 import gradio as gr
 from fastapi.staticfiles import StaticFiles
 
