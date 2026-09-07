@@ -236,6 +236,16 @@ def health_check():
     }
 
 
+# Root route: serve interactive dashboard directly
+@app.get("/")
+def read_root():
+    """Serves the main interactive dashboard."""
+    index_file = STATIC_DIR / "index.html"
+    if index_file.exists():
+        return FileResponse(index_file)
+    return {"message": "Telco Churn Intelligence API is running. Visit /docs for API documentation."}
+
+
 # Mount static assets directory
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR), html=True), name="static")
