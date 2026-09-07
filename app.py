@@ -1,48 +1,41 @@
-"""
-Hugging Face Spaces Entrypoint (Gradio SDK + FastAPI Engine)
-Mounts Gradio Blocks portal interface onto the existing FastAPI backend.
-"""
-
-import sys
-from pathlib import Path
 import importlib.util
+from pathlib import Path
 import gradio as gr
+from fastapi.staticfiles import StaticFiles
 
-# Ensure workspace root is on sys.path
-BASE_DIR = Path(__file__).resolve().parent
-if str(BASE_DIR) not in sys.path:
-    sys.path.insert(0, str(BASE_DIR))
+# 1. Dynamically import the existing FastAPI app from app/server.py
+server_path = Path(__file__).resolve().parent / "app" / "server.py"
+spec = importlib.util.spec_from_file_location("server_module", server_path)
+server_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(server_module)
+fastapi_app = server_module.app
 
-# Load FastAPI server module safely without colliding with root app.py name
-server_path = BASE_DIR / "app" / "server.py"
-spec = importlib.util.spec_from_file_location("server_api_module", server_path)
-server_api_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(server_api_module)
-fastapi_app = server_api_module.app
-
-# Define a clean Gradio Blocks portal interface
+# 2. Build the Gradio interface
 with gr.Blocks(title="Telco Churn Intelligence System") as demo:
     gr.Markdown(
         """
         # 📊 Telco Customer Churn Intelligence System
         
-        Welcome to the **Telco Churn Intelligence Engine (TCIE)** on Hugging Face Spaces!
+        The model engine and API services are running:
         
-        The machine learning inference engine and full REST API services are active:
-        
-        ### 🚀 Quick Access Links:
-        * 🌐 **[Open Full Interactive Web Dashboard](/static/index.html)** *(Single Customer Scoring, Batch CSV Processor, Model Diagnostic Visuals)*
-        * 📑 **[Open FastAPI Interactive Swagger Documentation](/docs)** *(API Explorer & Schema Models)*
-        * 🩺 **[Check System Health & Model Status](/health)**
-        
-        ---
-        *Powered by Scikit-Learn, FastAPI, and Gradio.*
+        * 🌐 **[Open Interactive Full Dashboard](/static/index.html)**
+        * 📑 **[FastAPI Swagger Documentation](/docs)**
+        * 🩺 **[System Health Check](/health)**
         """
     )
 
-# Mount Gradio onto the existing FastAPI application at root
-app = gr.mount_gradio_app(app=fastapi_app, blocks=demo, path="/")
+# 3. Mount existing FastAPI routes and static assets onto the Gradio app
+app = demo.app
+
+# Mount the FastAPI router/endpoints onto Gradio's underlying Starlette/FastAPI app
+for route in fastapi_app.routes:
+    if route not in app.routes:
+        app.routes.append(route)
+
+# Ensure static files are accessible
+static_dir = Path(__file__).resolve().parent / "app" / "static"
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(static_dir), html=True), name="custom_static")
 
 if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=7860)
+    demo.launch(server_name="0.0.0.0", server_port=7860)
