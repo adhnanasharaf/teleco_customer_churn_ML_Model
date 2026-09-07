@@ -55,6 +55,15 @@ try:
 except Exception:
     pass
 
+# 3. Compatibility hook for Hugging Face ZeroGPU environments (type: ignore prevents local IDE linter warning)
+try:
+    import spaces  # type: ignore
+    @spaces.GPU
+    def _zero_gpu_inference_hook():
+        return True
+except Exception:
+    pass
+
 import gradio as gr
 
 # 3. Import the FastAPI backend application
