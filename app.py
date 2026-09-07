@@ -241,7 +241,7 @@ with gr.Blocks(title="Telco Churn Intelligence Platform", css=custom_css) as dem
             )
 
 # 6. Mount Gradio onto the FastAPI application
-app = gr.mount_gradio(fastapi_app, demo, path="/")
+app = gr.mount_gradio_app(fastapi_app, demo, path="/")
 
 if __name__ == "__main__":
     import uvicorn
