@@ -1,5 +1,30 @@
 import importlib.util
 from pathlib import Path
+import sys
+
+# Compatibility shim: Ensure HfFolder is present if huggingface_hub >= 0.24 is loaded
+try:
+    import huggingface_hub
+    if not hasattr(huggingface_hub, "HfFolder"):
+        class HfFolder:
+            @classmethod
+            def get_token(cls):
+                return getattr(huggingface_hub, "get_token", lambda: None)()
+
+            @classmethod
+            def save_token(cls, token: str):
+                if hasattr(huggingface_hub, "login"):
+                    huggingface_hub.login(token=token)
+
+            @classmethod
+            def delete_token(cls):
+                if hasattr(huggingface_hub, "logout"):
+                    huggingface_hub.logout()
+
+        huggingface_hub.HfFolder = HfFolder
+except Exception:
+    pass
+
 import gradio as gr
 from fastapi.staticfiles import StaticFiles
 
