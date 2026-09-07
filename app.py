@@ -5,10 +5,14 @@ Production Gradio Application for Hugging Face Spaces & Local Deployment
 
 import os
 import sys
+import warnings
 from pathlib import Path
 import tempfile
 import pandas as pd
 import numpy as np
+
+# Suppress pickle version mismatch warnings
+warnings.filterwarnings("ignore")
 
 # Ensure project root is in sys.path
 BASE_DIR = Path(__file__).resolve().parent
@@ -47,6 +51,21 @@ try:
                     huggingface_hub.logout()
 
         huggingface_hub.HfFolder = HfFolder
+except Exception:
+    pass
+
+# 3. Patch Gradio 5 client schema parsing bug (handles boolean additionalProperties)
+try:
+    import gradio_client.utils
+    _orig_json_schema = gradio_client.utils._json_schema_to_python_type
+    def _safe_json_schema_to_python_type(schema, defs=None):
+        if isinstance(schema, bool) or not isinstance(schema, dict):
+            return "Any"
+        try:
+            return _orig_json_schema(schema, defs)
+        except Exception:
+            return "Any"
+    gradio_client.utils._json_schema_to_python_type = _safe_json_schema_to_python_type
 except Exception:
     pass
 
@@ -103,7 +122,37 @@ def load_persona_data(persona_key: str):
     )
 
 
-# 3. Single Prediction Function (Decorated for ZeroGPU)
+def build_prob_meter_html(prob: float) -> str:
+    pct = prob * 100
+    if pct >= 50:
+        color = "#ef4444"
+        text_color = "#fca5a5"
+    elif pct >= 30:
+        color = "#f59e0b"
+        text_color = "#fcd34d"
+    else:
+        color = "#10b981"
+        text_color = "#6ee7b7"
+
+    return f"""
+    <div style="background: #1e293b; padding: 18px; border-radius: 12px; border: 1px solid #334155; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <span style="font-weight: 600; color: #cbd5e1; font-size: 14px;">Estimated Churn Probability</span>
+            <span style="font-weight: 800; color: {text_color}; font-size: 22px;">{pct:.1f}%</span>
+        </div>
+        <div style="background: #0f172a; border-radius: 999px; height: 16px; overflow: hidden; position: relative; border: 1px solid #475569;">
+            <div style="background: {color}; height: 100%; width: {min(pct, 100):.1f}%; border-radius: 999px;"></div>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: #94a3b8;">
+            <span>🟢 0% (Loyal)</span>
+            <span>Decision Threshold (35.0%)</span>
+            <span>🔴 100% (Definite Churn)</span>
+        </div>
+    </div>
+    """
+
+
+# 4. Single Prediction Function (Decorated for ZeroGPU)
 @gpu_decorator
 def predict_single_customer(
     gender, senior_citizen, partner, dependents, tenure,
@@ -143,25 +192,27 @@ def predict_single_customer(
         # Color coding for risk badge
         if tier == "High":
             badge_html = f"""
-            <div style="background: rgba(239,68,68,0.15); border: 1px solid #ef4444; border-radius: 10px; padding: 16px; text-align: center; margin-bottom: 15px;">
-                <span style="font-size: 24px; font-weight: 800; color: #ef4444;">🚨 HIGH CHURN RISK ({prob_pct})</span>
-                <p style="color: #94a3b8; margin-top: 4px; font-size: 13px;">Customer is strongly inclined to cancel service. Immediate retention intervention required.</p>
+            <div style="background: rgba(239,68,68,0.18); border: 1px solid #ef4444; border-radius: 10px; padding: 16px; text-align: center; margin-bottom: 12px;">
+                <span style="font-size: 22px; font-weight: 800; color: #ef4444;">🚨 HIGH CHURN RISK ({prob_pct})</span>
+                <p style="color: #cbd5e1; margin-top: 4px; font-size: 13px;">Customer is strongly inclined to cancel. Immediate retention intervention required.</p>
             </div>
             """
         elif tier == "Medium":
             badge_html = f"""
-            <div style="background: rgba(245,158,11,0.15); border: 1px solid #f59e0b; border-radius: 10px; padding: 16px; text-align: center; margin-bottom: 15px;">
-                <span style="font-size: 24px; font-weight: 800; color: #f59e0b;">⚠️ MODERATE CHURN RISK ({prob_pct})</span>
-                <p style="color: #94a3b8; margin-top: 4px; font-size: 13px;">Customer shows warning indicators. Targeted incentive offers recommended.</p>
+            <div style="background: rgba(245,158,11,0.18); border: 1px solid #f59e0b; border-radius: 10px; padding: 16px; text-align: center; margin-bottom: 12px;">
+                <span style="font-size: 22px; font-weight: 800; color: #f59e0b;">⚠️ MODERATE CHURN RISK ({prob_pct})</span>
+                <p style="color: #cbd5e1; margin-top: 4px; font-size: 13px;">Customer shows warning indicators. Targeted incentive offers recommended.</p>
             </div>
             """
         else:
             badge_html = f"""
-            <div style="background: rgba(16,185,129,0.15); border: 1px solid #10b981; border-radius: 10px; padding: 16px; text-align: center; margin-bottom: 15px;">
-                <span style="font-size: 24px; font-weight: 800; color: #10b981;">🛡️ LOW CHURN RISK ({prob_pct})</span>
-                <p style="color: #94a3b8; margin-top: 4px; font-size: 13px;">Customer is highly loyal and stable. Suitable for loyalty cross-selling.</p>
+            <div style="background: rgba(16,185,129,0.18); border: 1px solid #10b981; border-radius: 10px; padding: 16px; text-align: center; margin-bottom: 12px;">
+                <span style="font-size: 22px; font-weight: 800; color: #10b981;">🛡️ LOW CHURN RISK ({prob_pct})</span>
+                <p style="color: #cbd5e1; margin-top: 4px; font-size: 13px;">Customer is highly loyal and stable. Suitable for loyalty cross-selling.</p>
             </div>
             """
+
+        meter_html = build_prob_meter_html(prob)
 
         drivers_md = "### 🔍 Key Risk Drivers & Anchors\n"
         for factor in res.get("top_risk_factors", []):
@@ -171,15 +222,13 @@ def predict_single_customer(
         for strat in res.get("retention_strategies", []):
             strat_md += f"* {strat}\n"
 
-        prob_dict = {"Will Churn": prob, "Will Stay": 1.0 - prob}
-        
-        return badge_html, prob_dict, drivers_md, strat_md
+        return badge_html, meter_html, drivers_md, strat_md
     except Exception as e:
         error_html = f"<div style='color: red; padding: 10px;'>Error during inference: {str(e)}</div>"
-        return error_html, {"Error": 1.0}, f"Error: {str(e)}", "N/A"
+        return error_html, "", f"Error: {str(e)}", "N/A"
 
 
-# 4. Batch CSV Prediction Function (Decorated for ZeroGPU)
+# 5. Batch CSV Prediction Function (Decorated for ZeroGPU)
 @gpu_decorator
 def predict_batch_csv(file_obj):
     if file_obj is None:
@@ -298,7 +347,7 @@ with gr.Blocks(title="Telco Churn Intelligence Platform", css=custom_css, theme=
                 with gr.Column(scale=2):
                     gr.Markdown("#### 🎯 Prediction Results & Retention Strategy")
                     out_badge = gr.HTML(label="Risk Badge")
-                    out_chart = gr.Label(label="Churn Probability Distribution", num_top_classes=2)
+                    out_meter = gr.HTML(label="Probability Meter")
                     out_drivers = gr.Markdown()
                     out_strategy = gr.Markdown()
 
@@ -319,7 +368,7 @@ with gr.Blocks(title="Telco Churn Intelligence Platform", css=custom_css, theme=
             predict_btn.click(
                 fn=predict_single_customer,
                 inputs=all_inputs,
-                outputs=[out_badge, out_chart, out_drivers, out_strategy]
+                outputs=[out_badge, out_meter, out_drivers, out_strategy]
             )
 
         # ==========================================
@@ -441,10 +490,11 @@ with gr.Blocks(title="Telco Churn Intelligence Platform", css=custom_css, theme=
             )
 
 
-# 5. Launch the Application with Gradio Queue
+# 6. Launch the Application with Gradio Queue
 if __name__ == "__main__":
     demo.queue().launch(
         server_name="0.0.0.0",
         server_port=7860,
-        ssr_mode=False
+        ssr_mode=False,
+        show_api=False
     )
