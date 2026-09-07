@@ -1,0 +1,157 @@
+{
+  "model_name": "Random Forest",
+  "optimal_threshold": 0.59,
+  "test_metrics": {
+    "accuracy": 0.7721788502484032,
+    "balanced_accuracy": 0.7501550027125474,
+    "precision": 0.5560253699788583,
+    "recall": 0.7032085561497327,
+    "f1": 0.6210153482880756,
+    "roc_auc": 0.8414050995892429,
+    "pr_auc": 0.6525035277023132,
+    "specificity": 0.7971014492753623,
+    "confusion_matrix": {
+      "tn": 825,
+      "fp": 210,
+      "fn": 111,
+      "tp": 263
+    },
+    "threshold": 0.59,
+    "classification_report": {
+      "0": {
+        "precision": 0.8814102564102564,
+        "recall": 0.7971014492753623,
+        "f1-score": 0.837138508371385,
+        "support": 1035.0
+      },
+      "1": {
+        "precision": 0.5560253699788583,
+        "recall": 0.7032085561497327,
+        "f1-score": 0.6210153482880756,
+        "support": 374.0
+      },
+      "accuracy": 0.7721788502484032,
+      "macro avg": {
+        "precision": 0.7187178131945573,
+        "recall": 0.7501550027125474,
+        "f1-score": 0.7290769283297303,
+        "support": 1409.0
+      },
+      "weighted avg": {
+        "precision": 0.7950412375846049,
+        "recall": 0.7721788502484032,
+        "f1-score": 0.779771537561479,
+        "support": 1409.0
+      }
+    }
+  },
+  "top_drivers": [
+    {
+      "feature": "IsMonthToMonth_Yes",
+      "importance": 0.09095537583466293
+    },
+    {
+      "feature": "Contract_Month-to-month",
+      "importance": 0.09043519944483094
+    },
+    {
+      "feature": "IsMonthToMonth_No",
+      "importance": 0.0858621833444512
+    },
+    {
+      "feature": "MonthlyToTotalRatio",
+      "importance": 0.06446827512313123
+    },
+    {
+      "feature": "tenure",
+      "importance": 0.06150102913120769
+    },
+    {
+      "feature": "TotalCharges",
+      "importance": 0.0468523864526595
+    },
+    {
+      "feature": "OnlineSecurity_No",
+      "importance": 0.04516098938460406
+    },
+    {
+      "feature": "TechSupport_No",
+      "importance": 0.03825546904936902
+    },
+    {
+      "feature": "InternetService_Fiber optic",
+      "importance": 0.03662559126349857
+    },
+    {
+      "feature": "AvgMonthlyChargeHistorical",
+      "importance": 0.034131642960340776
+    },
+    {
+      "feature": "Contract_Two year",
+      "importance": 0.0333834018100191
+    },
+    {
+      "feature": "TenureCohort_0-12m",
+      "importance": 0.032356075125347154
+    },
+    {
+      "feature": "MonthlyCharges",
+      "importance": 0.03206783244902744
+    },
+    {
+      "feature": "IsFiberOptic_No",
+      "importance": 0.031230153780727188
+    },
+    {
+      "feature": "IsFiberOptic_Yes",
+      "importance": 0.026490659295652703
+    }
+  ],
+  "benchmark_summary": [
+    {
+      "model_name": "Random Forest",
+      "accuracy": 0.7568363170428416,
+      "precision": 0.528498812235008,
+      "recall": 0.785953177257525,
+      "f1": 0.6317895302624869,
+      "roc_auc": 0.8483358381437279,
+      "std_roc_auc": 0.010031720540174335
+    },
+    {
+      "model_name": "Extra Trees",
+      "accuracy": 0.7523996022070887,
+      "precision": 0.5226643501643311,
+      "recall": 0.7919732441471572,
+      "f1": 0.6294024277650535,
+      "roc_auc": 0.8461526226630813,
+      "std_roc_auc": 0.009706284926102251
+    },
+    {
+      "model_name": "Logistic Regression",
+      "accuracy": 0.750091174009182,
+      "precision": 0.5189855410890621,
+      "recall": 0.7959866220735787,
+      "f1": 0.6281401429269418,
+      "roc_auc": 0.8455840765172784,
+      "std_roc_auc": 0.011135346100905974
+    },
+    {
+      "model_name": "Gradient Boosting",
+      "accuracy": 0.7957057593289845,
+      "precision": 0.6513449761337963,
+      "recall": 0.49565217391304345,
+      "f1": 0.5625658697822946,
+      "roc_auc": 0.8423937151863152,
+      "std_roc_auc": 0.009760922313455612
+    },
+    {
+      "model_name": "AdaBoost",
+      "accuracy": 0.7916234962592652,
+      "precision": 0.6910526479483675,
+      "recall": 0.3899665551839465,
+      "f1": 0.49830820792156577,
+      "roc_auc": 0.8413553441910544,
+      "std_roc_auc": 0.009492588398356289
+    }
+  ]
+}

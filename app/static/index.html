@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Telco Churn Intelligence Platform | ML Customer Retention Engine</title>
+  <meta name="description" content="Production-grade Telco Customer Churn Prediction and Retention Strategy Platform powered by Machine Learning.">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Top Header -->
+    <header class="header-hero">
+      <div class="brand-section">
+        <div class="brand-icon">⚡</div>
+        <div>
+          <h1 class="brand-title">Telco Churn Intelligence</h1>
+          <p class="brand-subtitle">Predictive Customer Retention & Real-Time Churn Risk Scoring Engine</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs" role="tablist">
+        <button class="nav-tab-btn active" id="tab-btn-single" onclick="switchTab('single')">
+          <span>👤</span> Customer Assessment
+        </button>
+        <button class="nav-tab-btn" id="tab-btn-batch" onclick="switchTab('batch')">
+          <span>📁</span> Batch CSV Scorer
+        </button>
+        <button class="nav-tab-btn" id="tab-btn-model" onclick="switchTab('model')">
+          <span>📊</span> Model Analytics
+        </button>
+      </nav>
+    </header>
+
+    <!-- ==========================================
+         TAB 1: SINGLE CUSTOMER PREDICTION
+         ========================================== -->
+    <main id="tab-single" class="tab-content active">
+      
+      <!-- Quick Load Persona Bar -->
+      <div class="persona-bar">
+        <span class="persona-label">Quick Persona Templates:</span>
+        <button type="button" class="persona-btn danger" onclick="loadPersona('high_risk')">🚨 High-Risk Newcomer</button>
+        <button type="button" class="persona-btn" onclick="loadPersona('moderate_risk')">⚠️ Moderate-Risk DSL User</button>
+        <button type="button" class="persona-btn success" onclick="loadPersona('low_risk')">🛡️ Loyal Low-Risk Advocate</button>
+      </div>
+
+      <div class="grid-2col">
+        
+        <!-- Left: Customer Profile Form -->
+        <div class="glass-card">
+          <form id="churn-form">
+            
+            <!-- Section 1: Demographics & Account -->
+            <div class="form-section-title">
+              <span>👤</span> Demographics & Tenure
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="gender">Gender</label>
+                <select id="gender" class="form-select">
+                  <option value="Female">Female</option>
+                  <option value="Male">Male</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="SeniorCitizen">Senior Citizen</label>
+                <select id="SeniorCitizen" class="form-select">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="Partner">Partner</label>
+                <select id="Partner" class="form-select">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="Dependents">Dependents</label>
+                <select id="Dependents" class="form-select">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Tenure Slider -->
+            <div class="form-group range-slider-container" style="margin-bottom: 24px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label class="form-label" for="tenure">Tenure (Customer Lifetime in Months)</label>
+                <span id="tenure-val" class="slider-val-badge">2 months</span>
+              </div>
+              <input type="range" id="tenure" min="0" max="72" value="2" oninput="updateSlider('tenure', this.value, ' months'); autoCalculateTotal();">
+            </div>
+
+            <!-- Section 2: Services Subscribed -->
+            <div class="form-section-title">
+              <span>🌐</span> Subscribed Telecom Services
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="PhoneService">Phone Service</label>
+                <select id="PhoneService" class="form-select">
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="MultipleLines">Multiple Lines</label>
+                <select id="MultipleLines" class="form-select">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No phone service">No phone service</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="InternetService">Internet Service Type</label>
+                <select id="InternetService" class="form-select">
+                  <option value="Fiber optic">Fiber optic (High Risk)</option>
+                  <option value="DSL">DSL</option>
+                  <option value="No">No Internet</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="OnlineSecurity">Online Security</label>
+                <select id="OnlineSecurity" class="form-select">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No internet service">No internet service</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="OnlineBackup">Online Backup</label>
+                <select id="OnlineBackup" class="form-select">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No internet service">No internet service</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="DeviceProtection">Device Protection</label>
+                <select id="DeviceProtection" class="form-select">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No internet service">No internet service</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="TechSupport">Tech Support (Retention Key)</label>
+                <select id="TechSupport" class="form-select">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No internet service">No internet service</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="StreamingTV">Streaming TV</label>
+                <select id="StreamingTV" class="form-select">
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                  <option value="No internet service">No internet service</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="StreamingMovies">Streaming Movies</label>
+                <select id="StreamingMovies" class="form-select">
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                  <option value="No internet service">No internet service</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Section 3: Contract & Billing -->
+            <div class="form-section-title">
+              <span>💳</span> Contract & Billing Details
+            </div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="Contract">Contract Commitment</label>
+                <select id="Contract" class="form-select">
+                  <option value="Month-to-month">Month-to-month</option>
+                  <option value="One year">One year</option>
+                  <option value="Two year">Two year</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="PaperlessBilling">Paperless Billing</label>
+                <select id="PaperlessBilling" class="form-select">
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+
+              <div class="form-group" style="grid-column: span 2;">
+                <label class="form-label" for="PaymentMethod">Payment Method</label>
+                <select id="PaymentMethod" class="form-select">
+                  <option value="Electronic check">Electronic check (Manual)</option>
+                  <option value="Mailed check">Mailed check (Manual)</option>
+                  <option value="Bank transfer (automatic)">Bank transfer (Automatic)</option>
+                  <option value="Credit card (automatic)">Credit card (Automatic)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Billing Sliders -->
+            <div class="form-group range-slider-container" style="margin-bottom: 16px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label class="form-label" for="MonthlyCharges">Monthly Bill Amount</label>
+                <span id="MonthlyCharges-val" class="slider-val-badge">$89.50</span>
+              </div>
+              <input type="range" id="MonthlyCharges" min="18" max="130" step="0.5" value="89.5" oninput="updateSlider('MonthlyCharges', '$' + parseFloat(this.value).toFixed(2)); autoCalculateTotal();">
+            </div>
+
+            <div class="form-group range-slider-container" style="margin-bottom: 24px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label class="form-label" for="TotalCharges">Total Lifetime Charges</label>
+                <span id="TotalCharges-val" class="slider-val-badge">$179.00</span>
+              </div>
+              <input type="range" id="TotalCharges" min="0" max="9000" step="10" value="179" oninput="updateSlider('TotalCharges', '$' + parseFloat(this.value).toFixed(2))">
+            </div>
+
+            <button type="button" class="btn-primary" onclick="predictSingleCustomer()">
+              <span>⚡</span> Run Real-Time Churn Analysis
+            </button>
+          </form>
+        </div>
+
+        <!-- Right: Results & Retention Strategies -->
+        <div class="results-pane">
+          
+          <!-- Churn Risk Meter Card -->
+          <div class="glass-card" style="text-align: center;">
+            <div class="card-sub-header" style="justify-content: center;">
+              <span>🎯</span> Churn Probability Assessment
+            </div>
+
+            <div class="gauge-container">
+              <div class="circular-gauge">
+                <svg class="gauge-svg" width="200" height="200" viewBox="0 0 200 200">
+                  <circle class="gauge-bg" cx="100" cy="100" r="90"></circle>
+                  <circle id="gauge-circle" class="gauge-fill" cx="100" cy="100" r="90"></circle>
+                </svg>
+                <div class="gauge-text-center">
+                  <span id="churn-prob-num" class="gauge-percentage">--%</span>
+                  <span class="gauge-label">Churn Risk</span>
+                </div>
+              </div>
+
+              <div id="risk-badge" class="risk-badge medium">
+                <span id="risk-badge-text">Calculating...</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Top Risk Factors Card -->
+          <div class="glass-card">
+            <div class="card-sub-header">
+              <span>⚠️</span> Key Customer Risk Factors
+            </div>
+            <div id="risk-factors-container" class="factors-list">
+              <div class="factor-item">
+                <span class="factor-icon">•</span>
+                <span>Click "Run Real-Time Churn Analysis" to identify risk drivers.</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Retention Action Playbook Card -->
+          <div class="glass-card">
+            <div class="card-sub-header">
+              <span>💡</span> Recommended Retention Playbook
+            </div>
+            <div id="retention-actions-container" class="retention-cards">
+              <div class="retention-card">
+                <div class="rec-title">Proactive Strategy Generator</div>
+                <div class="rec-action">AI-driven actionable recommendations will appear here.</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </main>
+
+
+    <!-- ==========================================
+         TAB 2: BATCH CSV SCORING
+         ========================================== -->
+    <main id="tab-batch" class="tab-content">
+      <div class="glass-card" style="margin-bottom: 24px;">
+        <div class="dropzone" id="dropzone" onclick="document.getElementById('csv-file-input').click()">
+          <div class="dropzone-icon">📤</div>
+          <div class="dropzone-title">Drop your Customer CSV File Here or Click to Browse</div>
+          <div class="dropzone-sub">Supports standard Telco dataset format. Automatically cleans, engineers features & scores churn probability.</div>
+          <input type="file" id="csv-file-input" accept=".csv" style="display: none;" onchange="handleCsvUpload(this.files)">
+        </div>
+      </div>
+
+      <!-- Batch Overview Stats -->
+      <div id="batch-stats" class="grid-4col" style="display: none; margin-bottom: 24px;">
+        <div class="stat-card">
+          <span class="stat-label">Total Customers Scored</span>
+          <span id="batch-total" class="stat-value">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Predicted Churners</span>
+          <span id="batch-churners" class="stat-value" style="color: var(--risk-high);">0</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Portfolio Churn Rate</span>
+          <span id="batch-rate" class="stat-value">0%</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">High Risk Customers</span>
+          <span id="batch-high" class="stat-value" style="color: var(--risk-high);">0</span>
+        </div>
+      </div>
+
+      <!-- Batch Table Preview -->
+      <div id="batch-results-container" class="glass-card" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <h2 class="card-sub-header">Batch Prediction Preview (Top 50 Records)</h2>
+          <button class="persona-btn" onclick="exportScoredTableToCsv()">📥 Export Scored CSV</button>
+        </div>
+        <div class="table-container">
+          <table class="data-table" id="batch-table">
+            <thead id="batch-table-head"></thead>
+            <tbody id="batch-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+
+
+    <!-- ==========================================
+         TAB 3: MODEL INTELLIGENCE & ANALYTICS
+         ========================================== -->
+    <main id="tab-model" class="tab-content">
+      
+      <!-- Metrics Overview -->
+      <div class="grid-4col" style="margin-bottom: 24px;">
+        <div class="stat-card">
+          <span class="stat-label">Champion Algorithm</span>
+          <span id="meta-model-name" class="stat-value" style="font-size: 1.4rem; color: var(--primary-light);">AdaBoost</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Test ROC-AUC Score</span>
+          <span id="meta-roc-auc" class="stat-value" style="color: var(--accent-cyan);">0.8443</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Churn Recall (Sensitivity)</span>
+          <span id="meta-recall" class="stat-value" style="color: var(--risk-low);">73.0%</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Decision Threshold</span>
+          <span id="meta-thresh" class="stat-value">0.490</span>
+        </div>
+      </div>
+
+      <!-- Benchmark Scoreboard Table -->
+      <div class="glass-card" style="margin-bottom: 24px;">
+        <div class="card-sub-header">
+          <span>🏆</span> 5-Fold Stratified Cross-Validation Benchmark Scoreboard
+        </div>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Algorithm</th>
+                <th>ROC-AUC (CV Mean ± Std)</th>
+                <th>F1-Score</th>
+                <th>Recall</th>
+                <th>Accuracy</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="benchmark-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Plots Gallery -->
+      <div class="plots-grid">
+        <div class="glass-card plot-card">
+          <div class="card-sub-header"><span>📈</span> Receiver Operating Characteristic (ROC) Curve</div>
+          <img src="/api/plots/roc_curve.png" alt="ROC Curve" class="plot-image">
+        </div>
+
+        <div class="glass-card plot-card">
+          <div class="card-sub-header"><span>🎯</span> Confusion Matrix (Holdout Test Set)</div>
+          <img src="/api/plots/confusion_matrix.png" alt="Confusion Matrix" class="plot-image">
+        </div>
+
+        <div class="glass-card plot-card">
+          <div class="card-sub-header"><span>🔍</span> Top Feature Importances & Churn Drivers</div>
+          <img src="/api/plots/feature_importance.png" alt="Feature Importance" class="plot-image">
+        </div>
+
+        <div class="glass-card plot-card">
+          <div class="card-sub-header"><span>📊</span> Model Benchmark Comparison</div>
+          <img src="/api/plots/model_comparison.png" alt="Model Comparison" class="plot-image">
+        </div>
+      </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      Telco Churn Intelligence Platform • Built with Scikit-Learn, FastAPI & Modern Web Architecture
+    </footer>
+
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+# Python Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller / Testing / IDE
+*.manifest
+*.spec
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Operating System Files
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Temporary outputs & logs
+*.log
+scored_output.csv
+scored_customers.csv
+
+# Keep essential artifacts and data
+!models/
+!models/best_churn_model.joblib
+!models/model_metadata.json
+!plots/
+!plots/*.png
+!data/
+!WA_Fn-UseC_-Telco-Customer-Churn.csv
+!sample_batch_customers.csv
